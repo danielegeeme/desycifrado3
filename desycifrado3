@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cifrado DES</title>
+</head>
+<body>
+
+  <h1>Cifrado y Descifrado DES</h1>
+
+  <div>
+    <label for="mensaje">Mensaje:</label>
+    <input type="text" id="mensaje"><br><br>
+    <label for="clave">Clave:</label>
+    <input type="text" id="clave"><br><br>
+    <button onclick="ejecutarCifrado()">Cifrar</button>
+    <button onclick="ejecutarDescifrado()">Descifrar</button>
+  </div>
+
+  <div id="resultado"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script>
+    // Tu función de cifrado DES (ejemplo con CryptoJS)
+    function cifrar(mensaje, clave) {
+      return CryptoJS.DES.encrypt(mensaje, clave).toString();
+    }
+
+    // Tu función de descifrado DES (ejemplo con CryptoJS)
+    function descifrar(textoCifrado, clave) {
+      var bytes = CryptoJS.DES.decrypt(textoCifrado, clave);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    }
+
+    // Escucha los mensajes que llegan desde Thunkable
+    window.addEventListener("message", function(event) {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.op === "cifrar") {
+          const mensaje = data.mensaje;
+          const clave = data.clave;
+          const resultadoCifrado = cifrar(mensaje, clave);
+          // Envía el resultado cifrado de vuelta a Thunkable
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ resultado: resultadoCifrado }));
+          }
+        } else if (data.op === "descifrar") {
+          const mensajeCifrado = data.mensaje;
+          const clave = data.clave;
+          const resultadoDescifrado = descifrar(mensajeCifrado, clave);
+          // Envía el resultado descifrado de vuelta a Thunkable
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ resultado: resultadoDescifrado }));
+          }
+        }
+      } catch (error) {
+        console.error("Error al procesar el mensaje:", error);
+      }
+    });
+
+    // Funciones de ejemplo para los botones (podrías no necesitarlas si todo se controla desde Thunkable)
+    function ejecutarCifrado() {
+      const mensaje = document.getElementById("mensaje").value;
+      const clave = document.getElementById("clave").value;
+      const resultadoCifrado = cifrar(mensaje, clave);
+      document.getElementById("resultado").innerText = "Mensaje Cifrado: " + resultadoCifrado;
+      // No necesitas enviar directamente desde aquí si Thunkable lo controla
+      // if (window.ReactNativeWebView) {
+      //   window.ReactNativeWebView.postMessage(JSON.stringify({ resultado: resultadoCifrado }));
+      // }
+    }
+
+    function ejecutarDescifrado() {
+      const mensajeCifrado = document.getElementById("mensaje").value;
+      const clave = document.getElementById("clave").value;
+      const resultadoDescifrado = descifrar(mensajeCifrado, clave);
+      document.getElementById("resultado").innerText = "Mensaje Descifrado: " + resultadoDescifrado;
+      // No necesitas enviar directamente desde aquí si Thunkable lo controla
+      // if (window.ReactNativeWebView) {
+      //   window.ReactNativeWebView.postMessage(JSON.stringify({ resultado: resultadoDescifrado }));
+      // }
+    }
+  </script>
+</body>
+</html>
